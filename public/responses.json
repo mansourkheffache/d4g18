@@ -1,0 +1,20 @@
+{
+    "id": "5bf5a98c0142711293f0cda1",
+    "answers": {
+        "1": {
+            "values": [
+                "Yes",
+                "Maybe"
+            ]
+        },
+        "2": {
+            "values": 0,
+            "custom": 55
+        },
+        "3": {
+            "values": 9,
+            "custom": 88
+        }
+    },
+    "ref": "9cf3d8"
+}

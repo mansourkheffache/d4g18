@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Survey</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="stylesheets/style.css">
+</head>
+<body>
+  <div id="base-div" class="pure-g">
+    <div id="welcome-div" class="pure-u-1-2" style="margin: auto; text-align:center">
+      <h1>Welcome to Green Survey!</h1>
+      <div class="pure-u-1-4">
+        <button id="start" class="pure-button pure-button-primary" style="margin: auto; font-size:125%">Start</button>
+      </div>
+      <div class="pure-u-1-4">
+        <button id="continue" class="pure-button pure-button-primary" style="margin: auto; font-size:125%">Continue</button>
+      </div>
+    </div>
+    <div id="form-wrapper" class="pure-u-1-2" style="margin: auto; text-align:center; display:none">
+    </div>
+  </div>
+  <hr>
+  <div id="nav" class="pure-g" style="margin-top: 10px">
+      <div class="pure-u-1-4" style="text-align: center">
+        <p id="code">Code</p>
+      </div>
+      <div class="pure-u-1-4" style="text-align: center">
+        <button id="prev" class="pure-button pure-button-primary">Previous</button>
+      </div>
+      <div class="pure-u-1-4" style="text-align: center">
+        <button id="next" class="pure-button pure-button-primary">Next</button>
+      </div>
+      <div class="pure-u-1-4" style="text-align: center">
+        <button id="save" class="pure-button pure-button-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+    <script>
+    $(function(){
+      var blueprints;
+      var box;
+      var responses = {};
+      var current_id;
+      var stack = [];
+
+      $("#start").click(function() {
+        //$.getJSON("https://jsonplaceholder.typicode.com/todos/1", function(data){
+        $.getJSON("final.json", function(data){
+          blueprints = data;
+          render_question();
+          $("#welcome-div").hide();
+          $("#form-wrapper").show();
+        });
+      })
+
+      $("#continue").click(function() {
+        if ($("#send-code").length){
+          $("#send-code").remove();
+          $("#code-field").remove();
+        } else {
+          $("#welcome-div").append(
+            "<div style='margin: 10px 0'><input id='code-field' type='text' placeholder='Enter your code here'></div>" +
+            "<div style='margin: 10px 0'><button id='send-code' class='pure-button pure-button-primary' style='margin: auto; font-size:125%'>Send</button></div>"
+          );
+        }
+      });
+
+      $("#send-code").click(function() {
+        $.getJSON("url/ref=" + $("#code-field").val(), function(data){
+          if (data.id) {
+            responses = data;
+          }
+        });
+      }); //end of send-code
+
+      $("#next").click(function() {
+        $("#question-form").remove();
+        render_question(blueprints[current_id].next[0]);
+      }); //end of next
+
+      function render_question(id){
+        if (id) {
+          current_id = id;
+        } else {
+          current_id = "1";
+        }
+        $("#form-wrapper").append(
+          "<form id='question-form' class='pure-form'></form>"
+        );
+        $("#question-form").append(
+          "<h1 id='question-text'></h1>"
+        );
+        var question = blueprints[current_id];
+        $("#question-text").text(question["text"]);
+        if(question.type === 'single') {
+          for (var i=0; i<question.options.length; i++){
+            $("#question-form").append(
+              "<label for='option" + i + "' class='pure-radio'>" +
+              "<input name='static-name' id='option" + i + "' type='radio' value='" + i + "'> " +
+              question.options[i] + "</label>"
+            );
+          }
+        } else if (question.type === 'multiple') {
+          for (var i=0; i<question.options.length; i++){
+            $("#question-form").append(
+              "<label for='option" + i + "' class='pure-checkbox'>" +
+              "<input name='static-name' id='option" + i + "' type='checkbox' value='" + i + "'> " +
+              question.options[i] + "</label>"
+            );
+          }
+        } else if (question.type === 'single_text') {
+          for (var i=0; i<question.options.length; i++){
+            $("#question-form").append(
+              "<label for='option" + i + "' class='pure-checkbox'>" +
+              "<input name='static-name' id='option" + i + "' type='checkbox' value='" + i + "'> " +
+              question.options[i] + "</label>"
+            );
+          }
+        } else if (question.type === 'text') {
+          $("#question-form").append(
+            "<input id='option0' type='text' placeholder='Enter your answer here'>"
+          );
+        } else if (question.type === 'multi_text') {
+          for (int 0; i<question.options.length; i++){
+            $("#question-form").append(
+              "<input id='option" + i + "' type='text' placeholder='Enter your answer here'>"
+            );
+          }
+        }
+
+      }; // end of render_question
+    }) //end of the main function
+    </script>
+</body>
+</html>
