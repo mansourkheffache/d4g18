@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
     	if (err) throw err;
     	console.log(result);
     	if (result) {
-	    	res.send({ id: result._id, answers: result.answers, ref: result.ref });
+	    	res.send({ id: result._id, responses: result.responses, ref: result.ref });
     	} else {
     		res.status(400);
     		res.send(result);
