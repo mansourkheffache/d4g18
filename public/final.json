@@ -116,7 +116,7 @@
 		"text": "Do you know the number of physical servers and virtual servers in your company?",
 		"type": "single",
 		"options": ["No", "I do not want to answer", "Yes"],
-		"next": [40, 40, 40]
+		"next": [43, 43, 40]
 	},
 	"40": {
 		"id": 40,
@@ -202,7 +202,7 @@
 		"text": "Do you have other devices in your company?",
 		"type": "single",
 		"options": ["yes", "No"],
-		"next": [63, 63]
+		"next": [63, 70]
 	},
 	"63": {
 		"id": 63,
