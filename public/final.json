@@ -278,7 +278,7 @@
 		"type": "single",
 		"options": ["Yes", "No", "I don't know"],
 		"deep": true,
-		"sub_question": ["Energy saving (Automatic standby)", "Black and white by default", "Default duplex", "Default draft mode"],
+		"sub_questions": ["Energy saving (Automatic standby)", "Black and white by default", "Default duplex", "Default draft mode"],
 		"next": [83, 83, 83]
 	},
 	"83": {
