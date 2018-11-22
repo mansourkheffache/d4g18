@@ -91,9 +91,15 @@
         // validate
         save_responses_local();
 
-        // advance depending on answer
+        current_id = get_current_id()
 
-        history.push(blueprints[get_current_id()].next[0]);
+        // advance depending on answer
+        if (blueprints[current_id].type === 'single' && !blueprints[current_id].deep) {
+          history.push(blueprints[current_id].next[responses[current_id].value]);
+        } else {
+          history.push(blueprints[get_current_id()].next[0]);
+        }
+
         render_question();
       }); //end of next
 
@@ -128,7 +134,7 @@
               currentAnswers.push(parseInt($('input[name="radiogroup-' + i + '"]:checked').val(), 10));
             }
 
-            responses[current_id] = { values: currentAnswers };
+            responses[current_id] = { value: currentAnswers };
 
           }
 
@@ -140,7 +146,7 @@
               currentAnswers.push($(this).prop('checked') ? 1 : 0);
             });
 
-            responses[current_id] = { values: currentAnswers }
+            responses[current_id] = { value: currentAnswers }
           }
 
         } else {
@@ -158,7 +164,7 @@
               currentAnswers.push($(this).prop('checked') ? 1 : 0);
             });
 
-            responses[current_id] = { values: currentAnswers }
+            responses[current_id] = { value: currentAnswers }
           }
 
           else if (question.type === 'text') {
@@ -196,7 +202,7 @@
         var question = blueprints[current_id];
 
         // append question text
-        $("#question-text").text(question["text"]);
+        $("#question-text").text(question["id"] + " - " + question["text"]);
 
         if(question.deep){
           $("#question-form").append(
