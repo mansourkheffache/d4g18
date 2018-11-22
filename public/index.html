@@ -126,7 +126,7 @@
           method: 'PUT',
           data: { ref, responses },
         }).done(function(res){
-            alert('Succesfully saved ' )
+            alert('Succesfully saved! You can resume using your reference code: ' + ref)
           })
           .fail(function(err) {
             console.log(err.status)
@@ -251,7 +251,7 @@
               currentAnswers.push($(this).prop('checked') ? 1 : 0);
             });
             if (temp_counter > 0){
-              responses[current_id] = { values: currentAnswers }
+              responses[current_id] = { value: currentAnswers }
             } else {
               alert("Please select at least one answer");
               isValid = false;
@@ -287,7 +287,76 @@
           }
         }
 
-        console.log(responses);
+        // console.log(responses);
+      }
+
+      function populate_form() {
+
+        current_id = get_current_id();
+        var question = blueprints[current_id];
+
+        if (question.type === 'multitext') {
+
+          var values = responses[current_id].custom.slice();
+          $('input[type="text"]').each(function(index) {
+            $(this).val(values.shift());
+          });
+          
+        }
+        else if (question.deep) {
+          if (question.type === 'single') {
+            var values = responses[current_id].value.slice();
+            for (var i = 0; i < question.sub_questions.length; i++) {
+
+              $('input[name="radiogroup-' + i + '"][value=' + values.shift() + ']').prop('checked', true);
+            }
+          }
+
+          else if (question.type === 'multiple') {
+            var values = responses[current_id].value.slice();
+            console.log(values)
+
+            $('input[type="checkbox"]').each(function() {
+              $(this).prop('checked', values.shift());
+            });
+
+          }
+
+        } 
+        else {
+          if (question.type === 'single') {
+
+            $('input[name="static-name"][value=' + responses[current_id].value + ']').prop('checked', true);
+
+          }
+
+          else if (question.type === 'multiple') {
+
+            var values = responses[current_id].value;
+            $('input[type="checkbox"]').each(function() {
+              $(this).prop('checked', values.shift());
+            });
+
+          }
+
+          else if (question.type === 'text') {
+            $('input#option0').val(responses[current_id].custom)
+          }
+
+          else if (question.type === 'single_text') {
+
+            $('input[name="static-name"][value=' + responses[current_id].value + ']').prop('checked', true);
+
+            if (responses[current_id].custom){
+              $("#question-form").append(
+                "<input id='option-custom' type='text' placeholder='Enter your answer here'>"
+              );
+              $('input#option-custom').val(responses[current_id].custom);
+
+            }
+          }
+        }
+
       }
 
       function render_question(){
@@ -405,9 +474,14 @@
             }
           }
         } // end of else
+
+        if (responses[current_id]) {
+          populate_form();
+        }
+
       }; // end of render_question
 
-    }) //end of the main function
+    }); //end of the main function
     </script>
 </body>
 </html>
