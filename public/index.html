@@ -23,7 +23,7 @@
   <hr>
   <div id="nav" class="pure-g" style="margin-top: 10px">
       <div class="pure-u-1-4" style="text-align: center">
-        <p id="code">Code</p>
+        <p id="code"></p>
       </div>
       <div class="pure-u-1-4" style="text-align: center">
         <button id="prev" class="pure-button pure-button-primary">Previous</button>
@@ -43,7 +43,7 @@
       var box;
       var responses = {};
       var ref = "";
-      var current_id = "0";
+      var current_id = 0;
       var history = [];
 
       const recordsAPI = '/records';
@@ -64,8 +64,10 @@
             // store ref locally
             ref = res.ref;
 
+            $("#code").html("Reference: <b>" + ref + "</b>");
+
             $.getJSON("final.json", function(data){
-              history.push("1");
+              history.push(1);
               blueprints = data;
               render_question();
               $("#welcome-div").remove();
@@ -94,7 +96,15 @@
       });
 
       $("#save").click(function() {
-
+        $.ajax(recordsAPI, {
+          method: 'PUT',
+          data: { ref, responses },
+        }).done(function(res){
+            alert('Succesfully saved ' )
+          })
+          .fail(function(err) {
+            console.log(err.status)
+          });
       });
 
       $("#send-code").click(function() {
@@ -127,8 +137,6 @@
 
         history.pop();
         render_question();
-
-
       }); //end of previous
 
       function save_responses_local() {
