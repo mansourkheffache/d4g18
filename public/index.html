@@ -42,8 +42,11 @@
       var blueprints;
       var box;
       var responses = {};
+      var ref = "";
       var current_id = "0";
       var history = [];
+
+      const recordsAPI = '/records';
 
 
       function get_current_id() {
@@ -54,15 +57,28 @@
       }
 
       $("#start").click(function() {
-        //$.getJSON("https://jsonplaceholder.typicode.com/todos/1", function(data){
-        $.getJSON("final.json", function(data){
-          history.push("1");
-          blueprints = data;
-          render_question();
-          $("#welcome-div").remove();
-          $("#form-wrapper").show();
-          $("#prev").prop("disabled", true);
-        });
+
+        $.post(recordsAPI)
+          .done(function(res){
+
+            // store ref locally
+            ref = res.ref;
+
+            $.getJSON("final.json", function(data){
+              history.push("1");
+              blueprints = data;
+              render_question();
+              $("#welcome-div").remove();
+              $("#form-wrapper").show();
+              $("#prev").prop("disabled", true);
+            });
+
+          })
+          .fail(function(err) {
+            console.log(err.status)
+          });
+
+
       })
 
       $("#continue").click(function() {
@@ -75,6 +91,10 @@
             "<div style='margin: 10px 0'><button id='send-code' class='pure-button pure-button-primary' style='margin: auto; font-size:125%'>Send</button></div>"
           );
         }
+      });
+
+      $("#save").click(function() {
+
       });
 
       $("#send-code").click(function() {
