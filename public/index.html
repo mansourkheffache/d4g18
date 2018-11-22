@@ -79,6 +79,7 @@
               render_question();
               $("#welcome-div").remove();
               $("#form-wrapper").show();
+              $("#nav").show();
               $("#prev").prop("disabled", true);
             });
 
@@ -143,6 +144,7 @@
 
       $("#next").click(function() {
         // validate
+        
         save_responses_local();
 
         current_id = get_current_id()
