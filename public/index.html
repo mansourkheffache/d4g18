@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="stylesheets/style.css">
 </head>
 <body>
+  <div class="export-button">
+    <a id="export" class="pure-button pure-button-primary" href="/records/export" style="font-family: Helvetica; margin: auto; font-size:125%; background-color:#4CAF50">Export data</a>
+  </div>
   <div id="base-div" class="pure-g">
     <div id="welcome-div" class="pure-u-1-2" style="margin: auto; text-align:center">
       <h1>Welcome to Green Survey!</h1>
@@ -22,16 +25,19 @@
   </div>
   <hr>
   <div id="nav" class="pure-g" style="margin-top: 10px; display:none">
-      <div class="pure-u-1-4" style="text-align: center">
+      <div class="pure-u-1-5" style="text-align: center">
         <p id="code"></p>
       </div>
-      <div class="pure-u-1-4" style="text-align: center">
+      <div class="pure-u-1-5" style="text-align: center">
         <button id="prev" class="pure-button pure-button-primary">Previous</button>
       </div>
-      <div class="pure-u-1-4" style="text-align: center">
+      <div class="pure-u-1-5" style="text-align: center">
+        <button id="submit" hidden class="pure-button pure-button-primary">Submit</button>
+      </div>
+      <div class="pure-u-1-5" style="text-align: center">
         <button id="next" class="pure-button pure-button-primary">Next</button>
       </div>
-      <div class="pure-u-1-4" style="text-align: center">
+      <div class="pure-u-1-5" style="text-align: center">
         <button id="save" class="pure-button pure-button-primary">Save</button>
       </div>
     </div>
@@ -88,37 +94,50 @@
             console.log(err.status)
           });
 
-
       })
 
       $("#continue").click(function() {
         if ($("#send-code").length){
           $("#send-code").remove();
           $("#code-field").remove();
-        } else {
+        }
+        else {
           $("#welcome-div").append(
             "<div style='margin: 10px 0'><input id='code-field' type='text' placeholder='Enter your code here'></div>" +
             "<div style='margin: 10px 0'><button id='send-code' class='pure-button pure-button-primary' style='margin: auto; font-size:125%'>Send</button></div>"
           );
 
           $("#send-code").click(function(){
-            $.getJSON(URL + "/", function(data){
-              if (data.id) {
-                records_id = data.id;
-                reference = data.ref;
-                responses = data.answers;
-                history.push("1");
-                render_question();
-                $("#welcome-div").remove();
-                $("#form-wrapper").show();
-                $("#nav").show();
-                $("#prev").prop("disabled", true);
-              } else {
-                alert("Could not find specified record. Please check your reference code");
-              }
+            $.ajax({
+              url: recordsAPI + "?ref=" + $("#code-field").val(),
+              type: 'GET',
+              success: function(data){
+                console.log(data.id);
+                responses = data.responses;
+                ref = data.ref;
+                $("#code").html("Reference: <b>" + ref + "</b>");
+                $.getJSON("final.json", function(data){
+                  history.push(1);
+                  blueprints = data;
+                  render_question();
+                  $("#welcome-div").remove();
+                  $("#form-wrapper").show();
+                  $("#nav").show();
+                  $("#prev").prop("disabled", true);
+                });
+              },
+              error: handleAjaxError
             });
+            function handleAjaxError(jqXHR, textStatus, errorThrown) {
+              // do something
+              if (jqXHR.status == 403) {
+                alert("This record has already been submitted");
+              } else if (jqXHR.status == 400) {
+                alert("Not found, check your reference code");
+              }
+            };
           });
-        }
+        } //end of else
       });
 
       $("#save").click(function() {
@@ -136,21 +155,12 @@
           });
       });
 
-      $("#send-code").click(function() {
-        // do this automatically
-        $.getJSON("url/ref=" + $("#code-field").val(), function(data){
-          if (data.id) {
-            responses = data;
-          }
-        });
-      }); //end of send-code
-
       $("#next").click(function() {
         // validate
-        
+
         save_responses_local();
 
-        current_id = get_current_id()
+        current_id = get_current_id();
         if (isValid){
           // advance depending on answer
           if (blueprints[current_id].type === 'single' && !blueprints[current_id].deep) {
@@ -158,16 +168,55 @@
           } else {
             history.push(blueprints[get_current_id()].next[0]);
           }
-
           render_question();
+        }
+
+        if (current_id == 88) {
+          $("#submit").prop("hidden", false);
+          $("#submit").click(function(){
+            save_responses_local();
+            if (isValid){
+              //console.log(responses);
+              final_responses = {};
+              for (var i=0; i<history.length; i++){
+                final_responses[history[i].toString()] = responses[history[i]];
+              }
+              console.log(final_responses);
+              $.ajax(recordsAPI + '/submit', {
+                method: 'POST',
+                data: { data : JSON.stringify({ ref, responses: final_responses }) },
+              }).done(function(res){
+                  show_outro();
+                })
+                .fail(function(err) {
+                  alert("Something went wrong. Try again.")
+                  console.log(err.status)
+                });
+            }
+          });
+          $("#next").hide();
         }
       }); //end of next
 
       $("#prev").click(function() {
-
         history.pop();
         render_question();
+        if ($("#submit")){
+          $("#submit").prop("hidden", true);
+          $("#next").show();
+        }
       }); //end of previous
+
+
+      function show_outro(){
+        $("#form-wrapper").remove();
+        $("#nav").remove();
+        $("#base-div").append(
+          '<div id="outro-div" class="pure-u-1-2" style="margin: auto; text-align:center">' +
+          '<h1>Thank you for participating in this survey. Your answer is invaluable to us to constitute the most representative sample of the companies in France.</h1></div>'
+        );
+      }
+
 
       function save_responses_local() {
         current_id = get_current_id();
@@ -304,7 +353,7 @@
           $('input[type="text"]').each(function(index) {
             $(this).val(values.shift());
           });
-          
+
         }
         else if (question.deep) {
           if (question.type === 'single') {
@@ -325,7 +374,7 @@
 
           }
 
-        } 
+        }
         else {
           if (question.type === 'single') {
 
