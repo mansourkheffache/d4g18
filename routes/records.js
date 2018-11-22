@@ -17,7 +17,13 @@ router.get('/', function(req, res, next) {
 	var db = mongoUtil.getDb();
 	db.collection('records').findOne({ ref: req.query.ref }, function(err, result) {
     	if (err) throw err;
-    	res.send({ id: result._id, answers: result.answers, ref: result.ref });
+    	console.log(result);
+    	if (result) {
+	    	res.send({ id: result._id, answers: result.answers, ref: result.ref });
+    	} else {
+    		res.status(400);
+    		res.send(result);
+    	}
 	});
 });
 
@@ -27,6 +33,7 @@ router.post('/', function(req, res, next) {
 	entry = { ref: Math.random().toString(16).substring(2, 8) };
 	var db = mongoUtil.getDb();
 	db.collection('records').insertOne(entry , function(err, result) {
+		if (err) throw err;
   		res.send({ id: result.ops[0]._id, ref: result.ops[0].ref });
 	});
 });
@@ -36,9 +43,14 @@ router.put('/', function(req, res, next) {
 	// save response to database and return id
 		// find response by reference
 	var db = mongoUtil.getDb();
-	db.collection('records').findOneAndUpdate({ ref: req.body.ref }, { $set: { answers: req.body.answers }}, function(err, result) {
+	db.collection('records').findOneAndUpdate({ ref: req.body.ref }, { $set: { responses: req.body.responses }}, function(err, result) {
     	if (err) throw err;
-    	res.send({ id: result.value._id, ref: result.value.ref });
+    	if (result.value) {
+	    	res.send({ id: result.value._id, ref: result.value.ref });
+    	} else {
+    		res.status(400);
+    		res.send(result.value);
+    	}
 	});
 });
 
