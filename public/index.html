@@ -110,28 +110,67 @@
 
         var question = blueprints[current_id];
 
-        if(question.type === 'single') {
-          responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10) }
-        }
 
-        else if(question.type === 'multiple') {
-
+        if (question.type === 'multitext') {
           var currentAnswers = [];
 
-          $('input[name="static-name"]').each(function() {
-            currentAnswers.push($(this).prop('checked') ? 1 : 0);
+          $('input[type="text"]').each(function() {
+            currentAnswers.push($(this).val());
           });
 
-          responses[current_id] = { value: currentAnswers }
+          responses[current_id] = { custom: currentAnswers };
+
+        } else if (question.deep) {
+          if (question.type === 'single') {
+
+            var currentAnswers = [];
+            for (var i = 0; i < question.sub_questions.length; i++) {
+              currentAnswers.push(parseInt($('input[name="radiogroup-' + i + '"]:checked').val(), 10));
+            }
+
+            responses[current_id] = { values: currentAnswers };
+
+          }
+
+          else if (question.type === 'multiple') {
+
+            var currentAnswers = [];
+
+            $('input[type="checkbox"]').each(function() {
+              currentAnswers.push($(this).prop('checked') ? 1 : 0);
+            });
+
+            responses[current_id] = { values: currentAnswers }
+          }
+
+        } else {
+          if (question.type === 'single') {
+
+            responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10) }
+
+          }
+
+          else if (question.type === 'multiple') {
+
+            var currentAnswers = [];
+
+            $('input[type="checkbox"]').each(function() {
+              currentAnswers.push($(this).prop('checked') ? 1 : 0);
+            });
+
+            responses[current_id] = { values: currentAnswers }
+          }
+
+          else if (question.type === 'text') {
+
+            responses[current_id] = { custom: $('input#option0').val() }
+
+          }
+
+          else if (question.type === 'single_text') {
+            responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10), custom: $('input#option-custom').val() }
+          }
         }
-
-        else if(question.type === 'text') {
-
-          var currentAnswers = [];
-
-          responses[current_id] = { custom: $('input#option0').val() }
-        }
-
 
         console.log(responses);
 
