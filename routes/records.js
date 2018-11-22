@@ -43,7 +43,10 @@ router.put('/', function(req, res, next) {
 	// save response to database and return id
 		// find response by reference
 	var db = mongoUtil.getDb();
-	db.collection('records').findOneAndUpdate({ ref: req.body.ref }, { $set: { responses: req.body.responses }}, function(err, result) {
+
+	var params = JSON.parse(req.body.data);
+
+	db.collection('records').findOneAndUpdate({ ref: params.ref }, { $set: { responses: params.responses }}, function(err, result) {
     	if (err) throw err;
     	if (result.value) {
 	    	res.send({ id: result.value._id, ref: result.value.ref });

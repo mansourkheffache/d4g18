@@ -20,6 +20,8 @@ mongoUtil.connectToDb( function( err ) {
 	// enable CORS
 
 	app.use(cors({ origin: "*" }));
+	app.use(bodyParser.json());
+	app.use(bodyParser.urlencoded({ extended: true }));
 
 
 	// view engine setup

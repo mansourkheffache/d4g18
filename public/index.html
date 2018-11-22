@@ -122,10 +122,13 @@
       });
 
       $("#save").click(function() {
+        // console.log(JSON.parse(JSON.stringify({ ref, responses })))
+        console.log(responses)
         $.ajax(recordsAPI, {
           method: 'PUT',
-          data: { ref, responses },
+          data: { data: JSON.stringify({ ref, responses }) },
         }).done(function(res){
+            console.log(responses);
             alert('Succesfully saved! You can resume using your reference code: ' + ref)
           })
           .fail(function(err) {
