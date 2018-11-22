@@ -46,7 +46,7 @@
 		"id": 11,
 		"text": "Is your computer room in house or at a host?",
 		"type": "single_text",
-		"options": ["I don't know", "I do not want to answer", "x TB >> response field to be added"],
+		"options": ["I don't know", "I do not want to answer", "Yes (Enter value in terabytes)"],
 		"custom": 2,
 		"next": [12, 12, 12]
 	},
@@ -132,21 +132,17 @@
 	},
 	"42": {
 		"id": 42,
-		"text": "What will be the evolution of your number of physical servers for 2019? (in% or quantity)",
+		"text": "What will be the evolution of your number of physical servers for 2019? (in % or quantity)",
 		"type": "single_text",
-		"options": ["Yes", "No", "I do not know"],
-		"deep": true,
-		"sub_questions": ["In % ", "In quantity", "I do not want to answer", "I don't know"],
+		"options": ["I want to answer (Please answer in % or quantity)", "I do not want to answer", "I don't know"],
 		"custom": 0,
 		"next": [43, 43, 43]
 	},
 	"43": {
 		"id": 43,
-		"text": "What will be the evolution of your number of virtual servers for 2019? (in% or quantity)",
+		"text": "What will be the evolution of your number of virtual servers for 2019?",
 		"type": "single_text",
-		"options": ["Yes", "No", "I do not know"],
-		"deep": true,
-		"sub_questions": ["In % ", "In quantity ", "I do not want to answer", "I don't know"],
+		"options": ["I want to answer (Please answer in % or quantity)", "I do not want to answer", "I don't know"],
 		"custom": [0],
 		"next": [44, 44, 44]
 	},
@@ -196,7 +192,7 @@
 		"id": 50,
 		"text": "Do you have those equipments in your compagny:",
 		"type": "multiple",
-		"options": ["used", "Not used functional", "Neither used nor functional"],
+		"options": ["Used", "Not used functional", "Neither used nor functional"],
 		"deep": true,
 		"sub_questions": ["Fixed stations, workstations", "Laptops, digital tablets", "Small printers (<15kg, potentially used by a household)", "Flat screen monitors", "Other flat screens (TV, projection screen, digital board ...)", "CRT monitors (monitors or other)", "Video projectors", "Mobile phones", "Fixed telephones (standalone not connected to such a standard)", "Digital cameras", "Hard Disk Devices, Storage, Backup"],
 		"next": [62, 62, 62]
@@ -212,7 +208,7 @@
 		"id": 63,
 		"text": "Do you have those equipments in your compagny:",
 		"type": "multiple",
-		"options": ["used", "Not used functional", "Neither used nor functional"],
+		"options": ["Used", "Not used functional", "Neither used nor functional"],
 		"deep": true,
 		"sub_questions": ["Keyboards", "Mouse", "Graphic tablets", "Scanners", "Speakers", "Office automation"],
 		"next": [70, 70, 70]

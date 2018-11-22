@@ -59,7 +59,7 @@
           history.push("1");
           blueprints = data;
           render_question();
-          $("#welcome-div").hide();
+          $("#welcome-div").remove();
           $("#form-wrapper").show();
           $("#prev").prop("disabled", true);
         });
@@ -142,7 +142,7 @@
         // diable previous on first question
         $("#prev").prop("disabled", history.length == 1);
 
-        // TODO turn next to submit on last question 
+        // TODO turn next to submit on last question
 
 
         $("#question-form").remove();
@@ -159,51 +159,101 @@
         // append question text
         $("#question-text").text(question["text"]);
 
-
-        // SINGLE CHOICE
-        if(question.type === 'single') {
-          for (var i=0; i<question.options.length; i++){
-            $("#question-form").append(
-              "<label for='option" + i + "' class='pure-radio'>" +
-              "<input name='static-name' id='option" + i + "' type='radio' value='" + i + "'> " +
-              question.options[i] + "</label>"
-            );
-          }
-
-        // MULTIPLE CHOICE
-        } else if (question.type === 'multiple') {
-          for (var i=0; i<question.options.length; i++){
-            $("#question-form").append(
-              "<label for='option" + i + "' class='pure-checkbox'>" +
-              "<input name='static-name' id='option" + i + "' type='checkbox' value='" + i + "'> " +
-              question.options[i] + "</label>"
-            );
-          }
-
-        // SINGLE CHOICE + TEXT
-        } else if (question.type === 'single_text') {
-          for (var i=0; i<question.options.length; i++){
-            $("#question-form").append(
-              "<label for='option" + i + "' class='pure-checkbox'>" +
-              "<input name='static-name' id='option" + i + "' type='checkbox' value='" + i + "'> " +
-              question.options[i] + "</label>"
-            );
-          }
-
-        // TEXT
-        } else if (question.type === 'text') {
+        if(question.deep){
           $("#question-form").append(
-            "<input id='option0' type='text' placeholder='Enter your answer here'>"
+            "<table id='question-table' class='pure-table'>" +
+            "<thead><tr><th></th>" +
+            "<th>" + question.options[0] + "</th>" +
+            "<th>" + question.options[1] + "</th>" +
+            "<th>" + question.options[2] + "</th>" +
+            "</tr></thead></table>"
           );
-        } else if (question.type === 'multi_text') {
-          for (var i=0; i<question.options.length; i++){
-            $("#question-form").append(
-              "<input id='option" + i + "' type='text' placeholder='Enter your answer here'>"
-            );
+
+          if(question.type === 'single'){
+            for (var i=0; i<question.sub_questions.length; i++){
+              $("#question-table").append(
+                "<tr>" +
+                "<th width='70%'>" + question.sub_questions[i] + "</th>" +
+                "<th width='10%'><input id='radio-" + i + "-0' name='radiogroup-" + i + "' type='radio' value=0></th>" +
+                "<th width='10%'><input id='radio-" + i + "-1' name='radiogroup-" + i + "' type='radio' value=1></th>" +
+                "<th width='10%'><input id='radio-" + i + "-2' name='radiogroup-" + i + "' type='radio' value=2></th>" +
+                "</tr>"
+              );
+            }
+          }
+
+          else if (question.type === 'multiple') {
+            for (var i=0; i<question.sub_questions.length; i++){
+              $("#question-table").append(
+                "<tr>" +
+                "<th width='70%'>" + question.sub_questions[i] + "</th>" +
+                "<th width='10%'><input id='checkbox-" + i + "-0' type='checkbox' value=0></th>" +
+                "<th width='10%'><input id='checkbox-" + i + "-1' type='checkbox' value=1></th>" +
+                "<th width='10%'><input id='checkbox-" + i + "-2' type='checkbox' value=2></th>" +
+                "</tr>"
+              );
+            }
           }
         }
 
-      };  // end of render_question
+        else {
+          if(question.type === 'single') {
+            for (var i=0; i<question.options.length; i++){
+              $("#question-form").append(
+                "<label for='option" + i + "' class='pure-radio'>" +
+                "<input name='static-name' id='option" + i + "' type='radio' value='" + i + "'> " +
+                question.options[i] + "</label>"
+              );
+            }
+          }
+
+          else if (question.type === 'multiple') {
+            for (var i=0; i<question.options.length; i++){
+              $("#question-form").append(
+                "<label for='option" + i + "' class='pure-checkbox'>" +
+                "<input name='static-name' id='option" + i + "' type='checkbox' value='" + i + "'> " +
+                question.options[i] + "</label>"
+              );
+            }
+          }
+
+          else if (question.type === 'single_text') {
+            for (var i=0; i<question.options.length; i++){
+              $("#question-form").append(
+                "<label for='option" + i + "' class='pure-radio'>" +
+                "<input name='static-name' id='option" + i + "' type='radio' value='" + i + "'> " +
+                question.options[i] + "</label>"
+              );
+              $("#option"+i).on('change', function() {
+                if (this.value == blueprints[get_current_id()].custom){
+                  $("#question-form").append(
+                    "<input id='option-custom' type='text' placeholder='Enter your answer here'>"
+                  );
+                }
+                else {
+                  $("#option-custom").remove();
+                }
+              });
+            }
+          }
+
+          else if (question.type === 'text') {
+            $("#question-form").append(
+              "<input id='option0' type='text' placeholder='Enter your answer here'>"
+            );
+          }
+
+          else if (question.type === 'multitext') {
+            for (var i=0; i<question.options.length; i++){
+              $("#question-form").append(
+                "<div style='margin-bottom: 10px'><label for='option" + i + "'> " + question.options[i] + " </label>" +
+                "<input id='option" + i + "' type='text'></div>"
+              );
+            }
+          }
+        } // end of else
+      }; // end of render_question
+
     }) //end of the main function
     </script>
 </body>
