@@ -44,6 +44,7 @@ router.put('/', function(req, res, next) {
 
 
 // export csv
+// TODO make it export from final answers
 router.get('/export', function(req, res, next) {
 
 	// find response by reference
@@ -63,5 +64,9 @@ router.get('/export', function(req, res, next) {
 	});
 });
 
+
+// TODO
+
+// submit responses
 
 module.exports = router;

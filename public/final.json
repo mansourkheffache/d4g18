@@ -126,7 +126,7 @@
 	},
 	"41": {
 		"id": 41,
-		"text": "How many physical servers do you have?",
+		"text": "How many virtual servers do you have?",
 		"type": "text",
 		"next": [42]
 	},

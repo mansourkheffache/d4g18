@@ -42,16 +42,26 @@
       var blueprints;
       var box;
       var responses = {};
-      var current_id;
-      var stack = [];
+      var current_id = "0";
+      var history = [];
+
+
+      function get_current_id() {
+
+        if (history.length == 0) return "-1";
+
+        return history[history.length - 1];
+      }
 
       $("#start").click(function() {
         //$.getJSON("https://jsonplaceholder.typicode.com/todos/1", function(data){
         $.getJSON("final.json", function(data){
+          history.push("1");
           blueprints = data;
           render_question();
           $("#welcome-div").hide();
           $("#form-wrapper").show();
+          $("#prev").prop("disabled", true);
         });
       })
 
@@ -68,6 +78,7 @@
       });
 
       $("#send-code").click(function() {
+        // do this automatically
         $.getJSON("url/ref=" + $("#code-field").val(), function(data){
           if (data.id) {
             responses = data;
@@ -76,16 +87,67 @@
       }); //end of send-code
 
       $("#next").click(function() {
-        $("#question-form").remove();
-        render_question(blueprints[current_id].next[0]);
+
+        // validate
+        save_responses_local();
+
+        // advance depending on answer
+
+        history.push(blueprints[get_current_id()].next[0]);
+        render_question();
       }); //end of next
 
-      function render_question(id){
-        if (id) {
-          current_id = id;
-        } else {
-          current_id = "1";
+      $("#prev").click(function() {
+
+        history.pop();
+        render_question();
+
+
+      }); //end of previous
+
+      function save_responses_local() {
+        current_id = get_current_id();
+
+        var question = blueprints[current_id];
+
+        if(question.type === 'single') {
+          responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10) }
         }
+
+        else if(question.type === 'multiple') {
+
+          var currentAnswers = [];
+
+          $('input[name="static-name"]').each(function() {
+            currentAnswers.push($(this).prop('checked') ? 1 : 0);
+          });
+
+          responses[current_id] = { value: currentAnswers }
+        }
+
+        else if(question.type === 'text') {
+
+          var currentAnswers = [];
+
+          responses[current_id] = { custom: $('input#option0').val() }
+        }
+
+
+        console.log(responses);
+
+      }
+
+      function render_question(){
+
+        // diable previous on first question
+        $("#prev").prop("disabled", history.length == 1);
+
+        // TODO turn next to submit on last question 
+
+
+        $("#question-form").remove();
+        current_id = get_current_id();
+
         $("#form-wrapper").append(
           "<form id='question-form' class='pure-form'></form>"
         );
@@ -93,7 +155,12 @@
           "<h1 id='question-text'></h1>"
         );
         var question = blueprints[current_id];
+
+        // append question text
         $("#question-text").text(question["text"]);
+
+
+        // SINGLE CHOICE
         if(question.type === 'single') {
           for (var i=0; i<question.options.length; i++){
             $("#question-form").append(
@@ -102,6 +169,8 @@
               question.options[i] + "</label>"
             );
           }
+
+        // MULTIPLE CHOICE
         } else if (question.type === 'multiple') {
           for (var i=0; i<question.options.length; i++){
             $("#question-form").append(
@@ -110,6 +179,8 @@
               question.options[i] + "</label>"
             );
           }
+
+        // SINGLE CHOICE + TEXT
         } else if (question.type === 'single_text') {
           for (var i=0; i<question.options.length; i++){
             $("#question-form").append(
@@ -118,19 +189,21 @@
               question.options[i] + "</label>"
             );
           }
+
+        // TEXT
         } else if (question.type === 'text') {
           $("#question-form").append(
             "<input id='option0' type='text' placeholder='Enter your answer here'>"
           );
         } else if (question.type === 'multi_text') {
-          for (int 0; i<question.options.length; i++){
+          for (var i=0; i<question.options.length; i++){
             $("#question-form").append(
               "<input id='option" + i + "' type='text' placeholder='Enter your answer here'>"
             );
           }
         }
 
-      }; // end of render_question
+      };  // end of render_question
     }) //end of the main function
     </script>
 </body>
