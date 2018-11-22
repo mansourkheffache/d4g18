@@ -21,7 +21,7 @@
     </div>
   </div>
   <hr>
-  <div id="nav" class="pure-g" style="margin-top: 10px">
+  <div id="nav" class="pure-g" style="margin-top: 10px; display:none">
       <div class="pure-u-1-4" style="text-align: center">
         <p id="code"></p>
       </div>
@@ -40,14 +40,21 @@
     <script>
     $(function(){
       var blueprints;
-      var box;
+      var records_id;
+      var reference;
       var responses = {};
       var ref = "";
       var current_id = 0;
       var history = [];
+      var URL = "http://51.75.249.217";
+      var isValid;
 
       const recordsAPI = '/records';
 
+
+     $.getJSON("final.json", function(data){
+       blueprints = data;
+     });
 
       function get_current_id() {
 
@@ -92,6 +99,24 @@
             "<div style='margin: 10px 0'><input id='code-field' type='text' placeholder='Enter your code here'></div>" +
             "<div style='margin: 10px 0'><button id='send-code' class='pure-button pure-button-primary' style='margin: auto; font-size:125%'>Send</button></div>"
           );
+
+          $("#send-code").click(function(){
+            $.getJSON(URL + "/", function(data){
+              if (data.id) {
+                records_id = data.id;
+                reference = data.ref;
+                responses = data.answers;
+                history.push("1");
+                render_question();
+                $("#welcome-div").remove();
+                $("#form-wrapper").show();
+                $("#nav").show();
+                $("#prev").prop("disabled", true);
+              } else {
+                alert("Could not find specified record. Please check your reference code");
+              }
+            });
+          });
         }
       });
 
@@ -117,20 +142,20 @@
       }); //end of send-code
 
       $("#next").click(function() {
-
         // validate
         save_responses_local();
 
         current_id = get_current_id()
+        if (isValid){
+          // advance depending on answer
+          if (blueprints[current_id].type === 'single' && !blueprints[current_id].deep) {
+            history.push(blueprints[current_id].next[responses[current_id].value]);
+          } else {
+            history.push(blueprints[get_current_id()].next[0]);
+          }
 
-        // advance depending on answer
-        if (blueprints[current_id].type === 'single' && !blueprints[current_id].deep) {
-          history.push(blueprints[current_id].next[responses[current_id].value]);
-        } else {
-          history.push(blueprints[get_current_id()].next[0]);
+          render_question();
         }
-
-        render_question();
       }); //end of next
 
       $("#prev").click(function() {
@@ -141,6 +166,7 @@
 
       function save_responses_local() {
         current_id = get_current_id();
+        isValid = true;
 
         var question = blueprints[current_id];
 
@@ -149,16 +175,28 @@
           var currentAnswers = [];
 
           $('input[type="text"]').each(function() {
-            currentAnswers.push($(this).val());
+            if($(this).val()) {
+              currentAnswers.push($(this).val());
+            }
+            else {
+              alert("Please fill all fields");
+              isValid = false;
+              return false;
+            }
           });
 
           responses[current_id] = { custom: currentAnswers };
 
         } else if (question.deep) {
           if (question.type === 'single') {
-
             var currentAnswers = [];
             for (var i = 0; i < question.sub_questions.length; i++) {
+              if(isNaN(parseInt($('input[name="radiogroup-' + i + '"]:checked').val(), 10))){
+                alert("Please make sure to answer all questions");
+                isValid = false;
+                return false;
+              }
+              //count = count + parseInt($('input[name="radiogroup-' + i + '"]:checked').val(), 10);
               currentAnswers.push(parseInt($('input[name="radiogroup-' + i + '"]:checked').val(), 10));
             }
 
@@ -167,8 +205,19 @@
           }
 
           else if (question.type === 'multiple') {
-
             var currentAnswers = [];
+
+            $('#question-table tbody tr').each(function(){
+              var temp_counter = 0;
+              $(this).find('input[type="checkbox"]').each(function(){
+                temp_counter += $(this).prop('checked') ? 1 : 0;
+              });
+              if (temp_counter == 0){
+                alert("Please make sure to answer all questions");
+                isValid = false;
+                return false;
+              }
+            });
 
             $('input[type="checkbox"]').each(function() {
               currentAnswers.push($(this).prop('checked') ? 1 : 0);
@@ -179,35 +228,64 @@
 
         } else {
           if (question.type === 'single') {
-
-            responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10) }
+            if(isNaN(parseInt($('input[name="static-name"]:checked').val(), 10))){
+              alert("Please select an answer");
+              isValid = false;
+              return false;
+            } else {
+              responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10) }
+            }
 
           }
 
           else if (question.type === 'multiple') {
 
             var currentAnswers = [];
+            var temp_counter = 0;
+            $('input[type="checkbox"]').length;
 
             $('input[type="checkbox"]').each(function() {
+              temp_counter += ($(this).prop('checked') ? 1 : 0);
               currentAnswers.push($(this).prop('checked') ? 1 : 0);
             });
+            if (temp_counter > 0){
+              responses[current_id] = { values: currentAnswers }
+            } else {
+              alert("Please select at least one answer");
+              isValid = false;
+              return false;
+            }
 
-            responses[current_id] = { value: currentAnswers }
           }
 
           else if (question.type === 'text') {
-
-            responses[current_id] = { custom: $('input#option0').val() }
-
+            if ($('input#option0').val() == ""){
+              alert("Please enter your answer in the text field");
+              isValid = false;
+              return false;
+            } else {
+              responses[current_id] = { custom: $('input#option0').val() }
+            }
           }
 
           else if (question.type === 'single_text') {
-            responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10), custom: $('input#option-custom').val() }
+            if (!isNaN(parseInt($('input[name="static-name"]:checked').val(), 10))){
+              if($('input#option-custom').val() == ""){
+                alert("Please enter your answer in the text field");
+                isValid = false;
+                return false;
+              }
+              responses[current_id] = { value: parseInt($('input[name="static-name"]:checked').val(), 10), custom: $('input#option-custom').val() }
+            } else {
+              alert("Please select an answer");
+              isValid = false;
+              return false;
+            }
+
           }
         }
 
         console.log(responses);
-
       }
 
       function render_question(){
@@ -239,12 +317,12 @@
             "<th>" + question.options[0] + "</th>" +
             "<th>" + question.options[1] + "</th>" +
             "<th>" + question.options[2] + "</th>" +
-            "</tr></thead></table>"
+            "</tr></thead><tbody></tbody></table>"
           );
 
           if(question.type === 'single'){
             for (var i=0; i<question.sub_questions.length; i++){
-              $("#question-table").append(
+              $("#question-table tbody").append(
                 "<tr>" +
                 "<th width='70%'>" + question.sub_questions[i] + "</th>" +
                 "<th width='10%'><input id='radio-" + i + "-0' name='radiogroup-" + i + "' type='radio' value=0></th>" +
@@ -257,7 +335,7 @@
 
           else if (question.type === 'multiple') {
             for (var i=0; i<question.sub_questions.length; i++){
-              $("#question-table").append(
+              $("#question-table tbody").append(
                 "<tr>" +
                 "<th width='70%'>" + question.sub_questions[i] + "</th>" +
                 "<th width='10%'><input id='checkbox-" + i + "-0' type='checkbox' value=0></th>" +
@@ -273,7 +351,7 @@
           if(question.type === 'single') {
             for (var i=0; i<question.options.length; i++){
               $("#question-form").append(
-                "<label for='option" + i + "' class='pure-radio'>" +
+                "<label for='option" + i + "' class='pure-radio' style='vertical-align:middle'>" +
                 "<input name='static-name' id='option" + i + "' type='radio' value='" + i + "'> " +
                 question.options[i] + "</label>"
               );
