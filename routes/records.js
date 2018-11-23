@@ -19,7 +19,9 @@ router.get('/', function(req, res, next) {
     	if (err) throw err;
     	console.log(result);
     	if (result) {
-	    	res.send({ id: result._id, responses: result.responses, ref: result.ref });
+				// already submitted
+				if (result.completed) res.sendStatus(403);
+				else res.send({ id: result._id, responses: result.responses, ref: result.ref });
     	} else {
     		res.status(400);
     		res.send(result);
@@ -57,6 +59,27 @@ router.put('/', function(req, res, next) {
 	});
 });
 
+// create final record
+router.post('/submit', function(req, res, next) {
+	// insert empty response to database and return id and new ref
+	entry = JSON.parse(req.body.data);
+	// console.log(entry);
+	var db = mongoUtil.getDb();
+
+	db.collection('final').insertOne(entry , function(err, result) {
+		// console.log(result);
+		if (err) throw err;
+		db.collection('records').findOneAndUpdate({ ref: entry.ref }, { $set: { completed: true }}, function(err, result) {
+	    	if (err) throw err;
+	    	if (result.value) {
+			  		res.sendStatus(200);
+	    	} else {
+	    		res.status(400);
+	    		res.send(result.value);
+	    	}
+		});
+	});
+});
 
 // export csv
 // TODO make it export from final answers
@@ -64,14 +87,14 @@ router.get('/export', function(req, res, next) {
 
 	// find response by reference
 	var db = mongoUtil.getDb();
-	db.collection('records').find({}).toArray(function(err, result) {
+	db.collection('final').find({}).toArray(function(err, result) {
     	if (err) throw err;
     	const fileName = (new Date().getTime()).toString() + '.csv';
     	fs.writeFile(__dirname + fileName, json2csv(result, { flatten: true }), function(err, data){
 		    if (err) throw err;
 
 		    res.setHeader('Content-Type', 'text/csv');
-			res.setHeader('Content-Disposition', 'attachment; filename=export-'+fileName);
+				res.setHeader('Content-Disposition', 'attachment; filename=export-'+fileName);
 
     		res.sendFile(path.join(__dirname + fileName));
 

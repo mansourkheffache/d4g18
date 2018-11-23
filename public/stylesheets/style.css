@@ -21,6 +21,12 @@ a {
   font-size: 125%;
 }
 
+.export-button{
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
 .pure-button:focus,a:active,a:hover{
     outline:0
 }
