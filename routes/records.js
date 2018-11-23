@@ -67,13 +67,13 @@ router.get('/export', function(req, res, next) {
 	db.collection('records').find({}).toArray(function(err, result) {
     	if (err) throw err;
     	const fileName = (new Date().getTime()).toString() + '.csv';
-    	fs.writeFile(fileName, json2csv(result, { flatten: true }), function(err, data){
+    	fs.writeFile(__dirname + fileName, json2csv(result, { flatten: true }), function(err, data){
 		    if (err) throw err;
 
 		    res.setHeader('Content-Type', 'text/csv');
 			res.setHeader('Content-Disposition', 'attachment; filename=export-'+fileName);
 
-    		res.sendFile(path.join(__dirname + '/../' + fileName));
+    		res.sendFile(path.join(__dirname + fileName));
 
 		});
 	});
