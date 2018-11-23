@@ -1,0 +1,15 @@
+HOW TO RUN:
+
+
+
+Development:
+
+npm bin/www
+
+
+
+
+
+Production:
+
+pm2 start bin/www
